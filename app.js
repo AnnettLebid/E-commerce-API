@@ -3,11 +3,20 @@ import morgan from "morgan";
 import "express-async-errors";
 import "dotenv/config.js";
 import { connectDB } from "./db/connect.js";
+import { notFound as notFoundMiddleware } from "./middleware/not-found.js";
+import { errorHandlerMiddleware } from "./middleware/error-handler.js";
+import authRouter from "./routes/authRoutes.js";
 
 const app = express();
 app.use(express.json());
 
+app.use("/api/v1/auth", authRouter);
+
 const port = process.env.PORT || 5001;
+
+app.use(morgan("tiny"));
+app.use(notFoundMiddleware);
+app.use(errorHandlerMiddleware);
 
 const start = async () => {
   try {
