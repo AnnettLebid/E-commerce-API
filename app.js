@@ -10,6 +10,7 @@ import authRouter from "./routes/authRoutes.js";
 
 const app = express();
 app.use(express.json());
+app.use(cookieParser(process.env.JWT_SECRET));
 
 app.use("/api/v1/auth", authRouter);
 
@@ -18,7 +19,6 @@ const port = process.env.PORT || 5001;
 app.use(morgan("tiny"));
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
-app.use(cookieParser(process.env.JWT_SECRET));
 
 const start = async () => {
   try {

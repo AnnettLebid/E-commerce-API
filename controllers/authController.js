@@ -6,6 +6,7 @@ import {
   isTokenValid,
   attachCookiesToResponse,
 } from "../utils/index.js";
+import { UnauthenticatedError } from "./../errors/unauthenticated.js";
 
 export const register = async (req, res) => {
   const { email, name, password } = req.body;
@@ -29,9 +30,35 @@ export const register = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-  res.send("login");
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    throw new CustomAPIError.BadRequestError(
+      "Please provide email and password"
+    );
+  }
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new CustomAPIError.UnauthenticatedError("Invalid credentials");
+  }
+
+  const isPasswordCorrect = await user.comparePassword(password);
+  if (!isPasswordCorrect) {
+    throw new CustomAPIError.UnauthenticatedError("Invalid credentials");
+  }
+
+  const tokenUser = { name: user.name, userId: user._id, role: user.role };
+  attachCookiesToResponse({ res, user: tokenUser });
+
+  res.status(StatusCodes.CREATED).json({ user: tokenUser });
 };
 
 export const logout = async (req, res) => {
-  res.send("logout");
+  res.cookie("token", "logout", {
+    httpOnly: true,
+    expires: new Date(Date.now()),
+  });
+
+  res.status(StatusCodes.OK).json({ msg: "user logged out!" });
 };
