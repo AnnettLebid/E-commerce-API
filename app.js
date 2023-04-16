@@ -18,7 +18,7 @@ const port = process.env.PORT || 5001;
 app.use(morgan("tiny"));
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
-app.use(cookieParser());
+app.use(cookieParser(process.env.JWT_SECRET));
 
 const start = async () => {
   try {
