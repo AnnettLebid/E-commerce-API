@@ -1,7 +1,11 @@
 import { StatusCodes } from "http-status-codes";
 import { User } from "../models/User.js";
 import { CustomAPIError } from "../errors/custom-api.js";
-import { createJWT, isTokenValid } from "../utils/index.js";
+import {
+  createJWT,
+  isTokenValid,
+  attachCookiesToResponse,
+} from "../utils/index.js";
 
 export const register = async (req, res) => {
   const { email, name, password } = req.body;
@@ -19,14 +23,7 @@ export const register = async (req, res) => {
 
   const tokenUser = { name: user.name, userId: user._id, role: user.role };
 
-  const token = createJWT({ payload: tokenUser });
-
-  const oneDay = 100 * 60 * 60 * 24;
-
-  res.cookie("token", token, {
-    httpOnly: true,
-    expires: new Date(Date.now() + oneDay),
-  });
+  attachCookiesToResponse({ res, user: tokenUser });
 
   res.status(StatusCodes.CREATED).json({ user: tokenUser });
 };

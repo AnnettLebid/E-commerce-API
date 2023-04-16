@@ -1,5 +1,6 @@
 import express from "express";
 import morgan from "morgan";
+import cookieParser from "cookie-parser";
 import "express-async-errors";
 import "dotenv/config.js";
 import { connectDB } from "./db/connect.js";
@@ -17,6 +18,7 @@ const port = process.env.PORT || 5001;
 app.use(morgan("tiny"));
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
+app.use(cookieParser());
 
 const start = async () => {
   try {

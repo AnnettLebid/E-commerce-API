@@ -1,1 +1,1 @@
-export { createJWT, isTokenValid } from "./jwt.js";
+export { createJWT, isTokenValid, attachCookiesToResponse } from "./jwt.js";
