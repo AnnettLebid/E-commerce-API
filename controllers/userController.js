@@ -1,6 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { User } from "../models/User.js";
 import { CustomAPIError } from "../errors/custom-api.js";
+import { UnauthenticatedError } from "./../errors/unauthenticated.js";
 
 export const getAllUsers = async (req, res) => {
   const users = await User.find({ role: "user" }).select("-password");
@@ -19,7 +20,7 @@ export const getSingleUser = async (req, res) => {
 };
 
 export const showCurrentUser = async (req, res) => {
-  res.send("showCurrentUser");
+  res.status(StatusCodes.OK).json({ user: req.user });
 };
 
 export const updateUser = async (req, res) => {
@@ -27,5 +28,25 @@ export const updateUser = async (req, res) => {
 };
 
 export const updateUserPassword = async (req, res) => {
-  res.send("updateUserPassword");
+  const { oldPassword, newPassword } = req.body;
+  console.log("oldPassword", oldPassword);
+  const { userId } = req.user;
+
+  if (!oldPassword || !newPassword) {
+    throw new CustomAPIError.BadRequestError("Please, provide both values");
+  }
+
+  const user = await User.findOne({
+    _id: req.user.userId,
+  });
+
+  const isPasswordCorrect = await user.comparePassword(oldPassword);
+  if (!isPasswordCorrect) {
+    throw new CustomAPIError.UnauthenticatedError("Invalid credentials");
+  }
+
+  user.password = newPassword;
+  await user.save();
+
+  res.status(StatusCodes.OK).json({ msg: "Success! Password Updated" });
 };
