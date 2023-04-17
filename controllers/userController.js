@@ -37,7 +37,7 @@ export const updateUserPassword = async (req, res) => {
   }
 
   const user = await User.findOne({
-    _id: req.user.userId,
+    _id: userId,
   });
 
   const isPasswordCorrect = await user.comparePassword(oldPassword);
