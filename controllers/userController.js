@@ -31,16 +31,17 @@ export const updateUser = async (req, res) => {
     throw new CustomAPIError.BadRequestError("Please provide all values");
   }
 
-  const user = findOneAndUpdate(
-    { _id: userId },
-    { email, name },
-    { new: true, runValidators: true }
-  );
+  const user = await User.findOne({ _id: userId });
+
+  user.email = email;
+  user.name = name;
+
+  await user.save();
 
   const tokenUser = createUserToken(user);
   attachCookiesToResponse({ res, user: tokenUser });
 
-  res.send(StatusCodes.OK).json({ user: tokenUser });
+  res.status(StatusCodes.OK).json({ user: tokenUser });
 };
 
 export const updateUserPassword = async (req, res) => {
