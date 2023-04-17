@@ -1,8 +1,11 @@
 import { StatusCodes } from "http-status-codes";
 import { User } from "../models/User.js";
-import { CustomAPIError } from "../errors/custom-api.js";
+import {
+  CustomAPIError,
+  UnauthenticatedError,
+  BadRequestError,
+} from "../errors/index.js";
 import { attachCookiesToResponse, createUserToken } from "../utils/index.js";
-import { UnauthenticatedError } from "./../errors/unauthenticated.js";
 
 export const register = async (req, res) => {
   const { email, name, password } = req.body;
@@ -29,19 +32,17 @@ export const login = async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    throw new CustomAPIError.BadRequestError(
-      "Please provide email and password"
-    );
+    throw new BadRequestError("Please provide email and password");
   }
 
   const user = await User.findOne({ email });
   if (!user) {
-    throw new CustomAPIError.UnauthenticatedError("Invalid credentials");
+    throw new UnauthenticatedError("Invalid credentials");
   }
 
   const isPasswordCorrect = await user.comparePassword(password);
   if (!isPasswordCorrect) {
-    throw new CustomAPIError.UnauthenticatedError("Invalid credentials");
+    throw new UnauthenticatedError("Invalid credentials");
   }
 
   const tokenUser = createUserToken(user);

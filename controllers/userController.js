@@ -1,7 +1,15 @@
 import { StatusCodes } from "http-status-codes";
 import { User } from "../models/User.js";
-import { CustomAPIError } from "../errors/custom-api.js";
-import { createUserToken, attachCookiesToResponse } from "../utils/index.js";
+import {
+  NotFoundError,
+  BadRequestError,
+  UnauthenticatedError,
+} from "../errors/index.js";
+import {
+  createUserToken,
+  attachCookiesToResponse,
+  checkPermissions,
+} from "../utils/index.js";
 
 export const getAllUsers = async (req, res) => {
   const users = await User.find({ role: "user" }).select("-password");
@@ -13,8 +21,9 @@ export const getSingleUser = async (req, res) => {
   const user = await User.findOne({ _id: id }).select("-password");
 
   if (!user) {
-    throw new CustomAPIError.NotFoundError(`No user with id: ${id}`);
+    throw new NotFoundError(`No user with id: ${id}`);
   }
+  checkPermissions(req.user, user._id);
 
   res.status(StatusCodes.OK).json({ user });
 };
@@ -28,7 +37,7 @@ export const updateUser = async (req, res) => {
   const { userId } = req.user;
 
   if (!name || !email) {
-    throw new CustomAPIError.BadRequestError("Please provide all values");
+    throw new BadRequestError("Please provide all values");
   }
 
   const user = await User.findOne({ _id: userId });
@@ -49,7 +58,7 @@ export const updateUserPassword = async (req, res) => {
   const { userId } = req.user;
 
   if (!oldPassword || !newPassword) {
-    throw new CustomAPIError.BadRequestError("Please, provide both values");
+    throw new BadRequestError("Please, provide both values");
   }
 
   const user = await User.findOne({
@@ -58,7 +67,7 @@ export const updateUserPassword = async (req, res) => {
 
   const isPasswordCorrect = await user.comparePassword(oldPassword);
   if (!isPasswordCorrect) {
-    throw new CustomAPIError.UnauthenticatedError("Invalid credentials");
+    throw new UnauthenticatedError("Invalid credentials");
   }
 
   user.password = newPassword;
