@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { User } from "../models/User.js";
 import { CustomAPIError } from "../errors/custom-api.js";
-import { UnauthenticatedError } from "./../errors/unauthenticated.js";
+import { createUserToken, attachCookiesToResponse } from "../utils/index.js";
 
 export const getAllUsers = async (req, res) => {
   const users = await User.find({ role: "user" }).select("-password");
@@ -24,7 +24,23 @@ export const showCurrentUser = async (req, res) => {
 };
 
 export const updateUser = async (req, res) => {
-  res.send("updateUser");
+  const { name, email } = req.body;
+  const { userId } = req.user;
+
+  if (!name || !email) {
+    throw new CustomAPIError.BadRequestError("Please provide all values");
+  }
+
+  const user = findOneAndUpdate(
+    { _id: userId },
+    { email, name },
+    { new: true, runValidators: true }
+  );
+
+  const tokenUser = createUserToken(user);
+  attachCookiesToResponse({ res, user: tokenUser });
+
+  res.send(StatusCodes.OK).json({ user: tokenUser });
 };
 
 export const updateUserPassword = async (req, res) => {
