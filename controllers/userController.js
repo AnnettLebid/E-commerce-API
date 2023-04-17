@@ -29,7 +29,6 @@ export const updateUser = async (req, res) => {
 
 export const updateUserPassword = async (req, res) => {
   const { oldPassword, newPassword } = req.body;
-  console.log("oldPassword", oldPassword);
   const { userId } = req.user;
 
   if (!oldPassword || !newPassword) {
