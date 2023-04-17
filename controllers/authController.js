@@ -1,11 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { User } from "../models/User.js";
 import { CustomAPIError } from "../errors/custom-api.js";
-import {
-  createJWT,
-  isTokenValid,
-  attachCookiesToResponse,
-} from "../utils/index.js";
+import { attachCookiesToResponse, createUserToken } from "../utils/index.js";
 import { UnauthenticatedError } from "./../errors/unauthenticated.js";
 
 export const register = async (req, res) => {
@@ -22,7 +18,7 @@ export const register = async (req, res) => {
 
   const user = await User.create({ name, email, password, role });
 
-  const tokenUser = { name: user.name, userId: user._id, role: user.role };
+  const tokenUser = createUserToken(user);
 
   attachCookiesToResponse({ res, user: tokenUser });
 
@@ -48,7 +44,7 @@ export const login = async (req, res) => {
     throw new CustomAPIError.UnauthenticatedError("Invalid credentials");
   }
 
-  const tokenUser = { name: user.name, userId: user._id, role: user.role };
+  const tokenUser = createUserToken(user);
   attachCookiesToResponse({ res, user: tokenUser });
 
   res.status(StatusCodes.CREATED).json({ user: tokenUser });
