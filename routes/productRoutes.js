@@ -20,7 +20,7 @@ router
   .post([authenticateUser, authorizePermissions("admin")], createProduct);
 
 router
-  .route("uploadImage")
+  .route("/uploadImage")
   .post([authenticateUser, authorizePermissions("admin")], uploadImage);
 
 router
