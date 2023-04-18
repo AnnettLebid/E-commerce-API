@@ -1,6 +1,7 @@
 import express from "express";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
+import fileUpload from "express-fileupload";
 import "express-async-errors";
 import "dotenv/config.js";
 import { connectDB } from "./db/connect.js";
@@ -13,6 +14,8 @@ import productRouter from "./routes/productRoutes.js";
 const app = express();
 app.use(express.json());
 app.use(cookieParser(process.env.JWT_SECRET));
+app.use(express.static("/public"));
+app.use(fileUpload());
 
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);

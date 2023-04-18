@@ -1,6 +1,8 @@
+import path from "path";
+import * as url from "url";
 import { StatusCodes } from "http-status-codes";
 import { Product } from "../models/Product.js";
-import { NotFoundError } from "../errors/index.js";
+import { NotFoundError, BadRequestError } from "../errors/index.js";
 
 export const createProduct = async (req, res) => {
   req.body.user = req.user.userId;
@@ -56,5 +58,26 @@ export const deleteProduct = async (req, res) => {
 };
 
 export const uploadImage = async (req, res) => {
-  res.send("uploadImage");
+  if (!req.files) {
+    throw new BadRequestError("No file uploaded!");
+  }
+
+  const productImage = req.files.image;
+  if (!productImage.mimetype.startsWith("image")) {
+    throw new BadRequestError("Please upload image");
+  }
+
+  const maxSize = 1024 * 1024;
+  if (productImage.size > maxSize) {
+    throw new BadRequestError("Please upload image smaller than 1MB");
+  }
+
+  const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
+  const imagePath = path.join(
+    __dirname,
+    "../public/uploads/" + `${productImage.name}`
+  );
+  await productImage.mv(imagePath);
+
+  res.status(StatusCodes.OK).json({ image: `/uploads/${productImage.name}` });
 };
