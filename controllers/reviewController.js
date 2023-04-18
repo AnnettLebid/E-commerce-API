@@ -36,11 +36,18 @@ export const createReview = async (req, res) => {
 export const getAllReviews = async (req, res) => {
   const reviews = await Review.find({});
 
-  res.status(StatusCodes.OK).json({ reviews });
+  res.status(StatusCodes.OK).json({ reviews, count: reviews.length });
 };
 
 export const getSingleReview = async (req, res) => {
-  res.send("getSingleReview");
+  const { id: reviewId } = req.params;
+  const review = await Review.findOne({ _id: reviewId });
+
+  if (!review) {
+    throw new NotFoundError(`No review with id: ${reviewId}`);
+  }
+
+  res.status(StatusCodes.OK).json({ review });
 };
 
 export const updateReview = async (req, res) => {
