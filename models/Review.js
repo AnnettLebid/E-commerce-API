@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const ReviewSchema = new mongoose.Schema(
+const ReviewSchema = mongoose.Schema(
   {
     rating: {
       type: Number,
@@ -11,8 +11,8 @@ const ReviewSchema = new mongoose.Schema(
     title: {
       type: String,
       trim: true,
-      required: [true, "Please provide title"],
-      maxLength: 100,
+      required: [true, "Please provide review title"],
+      maxlength: 100,
     },
     comment: {
       type: String,
@@ -21,10 +21,12 @@ const ReviewSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.ObjectId,
       ref: "User",
+      required: true,
     },
     product: {
       type: mongoose.Schema.ObjectId,
       ref: "Product",
+      required: true,
     },
   },
   { timestamps: true }
@@ -33,7 +35,29 @@ const ReviewSchema = new mongoose.Schema(
 ReviewSchema.index({ product: 1, user: 1 }, { unique: true }); //only one review per product per user
 
 ReviewSchema.statics.calculateAverageRating = async function (productId) {
-  console.log("product", productId);
+  const result = await this.aggregate([
+    { $match: { product: productId } },
+    {
+      $group: {
+        _id: null,
+        averageRating: { $avg: "$rating" },
+        numOfReviews: { $sum: 1 },
+      },
+    },
+  ]);
+  console.log(result);
+
+  try {
+    await this.model("Product").findOneAndUpdate(
+      { _id: productId },
+      {
+        averageRating: Math.ceil(result[0]?.averageRating || 0),
+        numOfReviews: result[0]?.numOfReviews || 0,
+      }
+    );
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 ReviewSchema.post("save", async function () {
