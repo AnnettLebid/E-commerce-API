@@ -10,8 +10,8 @@ import { errorHandlerMiddleware } from "./middleware/error-handler.js";
 import authRouter from "./routes/authRoutes.js";
 import userRouter from "./routes/userRoutes.js";
 import productRouter from "./routes/productRoutes.js";
-import reviewRouter from "./routes/reviewRouter.js";
-import orderRouter from "./routes/orderRouter.js";
+import reviewRouter from "./routes/reviewRoutes.js";
+import orderRouter from "./routes/orderRoutes.js";
 
 const app = express();
 app.use(express.json());

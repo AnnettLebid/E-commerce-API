@@ -22,7 +22,6 @@ router.route("/showAllMyOrders").get(authenticateUser, getCurrentUserOrders);
 router
   .route("/:id")
   .get(authenticateUser, getSingleOrder)
-  .patch(authenticateUser, updateOrder)
-  .delete(authenticateUser, deleteReview);
+  .patch(authenticateUser, updateOrder);
 
 export default router;
