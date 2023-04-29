@@ -1,11 +1,5 @@
 import express from "express";
-import {
-  createOrder,
-  getAllOrders,
-  getSingleOrder,
-  updateOrder,
-  getCurrentUserOrders,
-} from "../controllers/orderController.js";
+import OrderController from "../controllers/orderController.js";
 import {
   authenticateUser,
   authorizePermissions,
@@ -14,14 +8,20 @@ import {
 const router = express.Router();
 router
   .route("/")
-  .post(authenticateUser, createOrder)
-  .get(authenticateUser, authorizePermissions("admin"), getAllOrders);
+  .post(authenticateUser, OrderController.createOrder)
+  .get(
+    authenticateUser,
+    authorizePermissions("admin"),
+    OrderController.getAllOrders
+  );
 
-router.route("/showAllMyOrders").get(authenticateUser, getCurrentUserOrders);
+router
+  .route("/showAllMyOrders")
+  .get(authenticateUser, OrderController.getCurrentUserOrders);
 
 router
   .route("/:id")
-  .get(authenticateUser, getSingleOrder)
-  .patch(authenticateUser, updateOrder);
+  .get(authenticateUser, OrderController.getSingleOrder)
+  .patch(authenticateUser, OrderController.updateOrder);
 
 export default router;
