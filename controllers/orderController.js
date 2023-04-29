@@ -35,7 +35,7 @@ export const createOrder = async (req, res) => {
     }
 
     const { name, price, image, _id } = dbProduct;
-    console.log(name, price, image, _id);
+
     const singleOrderItem = {
       amount: item.amount,
       name,
@@ -85,7 +85,19 @@ export const getSingleOrder = async (req, res) => {
 };
 
 export const updateOrder = async (req, res) => {
-  res.send("updateOrder");
+  const { id: orderId } = req.params;
+  const { paymentIntentId } = req.body;
+  const order = await Order.findOne({ _id: orderId });
+
+  if (!order) {
+    throw new NotFoundError(`No order with id: ${orderId}`);
+  }
+  checkPermissions(req.user, order.user);
+  order.paymentIntentId = paymentIntentId;
+  order.status = "paid";
+  await order.save();
+
+  res.status(StatusCodes.OK).json({ order });
 };
 
 export const getCurrentUserOrders = async (req, res) => {
