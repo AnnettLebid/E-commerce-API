@@ -3,34 +3,38 @@ import {
   authenticateUser,
   authorizePermissions,
 } from "../middleware/authentication.js";
-import {
-  createProduct,
-  getAllProducts,
-  getSingleProduct,
-  updateProduct,
-  deleteProduct,
-  uploadImage,
-} from "../controllers/productController.js";
-
-import { getSingleProductReviews } from "../controllers/reviewController.js";
+import ProductController from "../controllers/productController.js";
+import ReviewController from "../controllers/reviewController.js";
 
 const router = express.Router();
 
 router
   .route("/")
-  .get(getAllProducts)
-  .post([authenticateUser, authorizePermissions("admin")], createProduct);
+  .get(ProductController.getAllProducts)
+  .post(
+    [authenticateUser, authorizePermissions("admin")],
+    ProductController.createProduct
+  );
 
 router
   .route("/uploadImage")
-  .post([authenticateUser, authorizePermissions("admin")], uploadImage);
+  .post(
+    [authenticateUser, authorizePermissions("admin")],
+    ProductController.uploadImage
+  );
 
 router
   .route("/:id")
-  .get(getSingleProduct)
-  .patch([authenticateUser, authorizePermissions("admin")], updateProduct)
-  .delete([authenticateUser, authorizePermissions("admin")], deleteProduct);
+  .get(ProductController.getSingleProduct)
+  .patch(
+    [authenticateUser, authorizePermissions("admin")],
+    ProductController.updateProduct
+  )
+  .delete(
+    [authenticateUser, authorizePermissions("admin")],
+    ProductController.deleteProduct
+  );
 
-router.route("/:id/reviews").get(getSingleProductReviews);
+router.route("/:id/reviews").get(ReviewController.getSingleProductReviews);
 
 export default router;

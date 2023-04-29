@@ -1,20 +1,17 @@
 import express from "express";
-import {
-  getAllReviews,
-  getSingleReview,
-  createReview,
-  updateReview,
-  deleteReview,
-} from "../controllers/reviewController.js";
+import ReviewController from "../controllers/reviewController.js";
 import { authenticateUser } from "../middleware/authentication.js";
 
 const router = express.Router();
-router.route("/").get(getAllReviews).post(authenticateUser, createReview);
+router
+  .route("/")
+  .get(ReviewController.getAllReviews)
+  .post(authenticateUser, ReviewController.createReview);
 
 router
   .route("/:id")
-  .get(getSingleReview)
-  .patch(authenticateUser, updateReview)
-  .delete(authenticateUser, deleteReview);
+  .get(ReviewController.getSingleReview)
+  .patch(authenticateUser, ReviewController.updateReview)
+  .delete(authenticateUser, ReviewController.deleteReview);
 
 export default router;

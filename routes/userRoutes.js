@@ -1,11 +1,5 @@
 import express from "express";
-import {
-  getAllUsers,
-  getSingleUser,
-  showCurrentUser,
-  updateUser,
-  updateUserPassword,
-} from "../controllers/userController.js";
+import UserController from "../controllers/userController.js";
 import {
   authenticateUser,
   authorizePermissions,
@@ -15,12 +9,18 @@ const router = express.Router();
 
 router
   .route("/")
-  .get(authenticateUser, authorizePermissions("admin"), getAllUsers);
-router.route("/showMe").get(authenticateUser, showCurrentUser);
+  .get(
+    authenticateUser,
+    authorizePermissions("admin"),
+    UserController.getAllUsers
+  );
+router.route("/showMe").get(authenticateUser, UserController.showCurrentUser);
 
-router.route("/updateUser").patch(authenticateUser, updateUser);
-router.route("/updateUserPassword").patch(authenticateUser, updateUserPassword);
+router.route("/updateUser").patch(authenticateUser, UserController.updateUser);
+router
+  .route("/updateUserPassword")
+  .patch(authenticateUser, UserController.updateUserPassword);
 
-router.route("/:id").get(authenticateUser, getSingleUser);
+router.route("/:id").get(authenticateUser, UserController.getSingleUser);
 
 export default router;

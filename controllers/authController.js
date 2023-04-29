@@ -7,55 +7,57 @@ import {
 } from "../errors/index.js";
 import { attachCookiesToResponse, createUserToken } from "../utils/index.js";
 
-export const register = async (req, res) => {
-  const { email, name, password } = req.body;
-  const emailExists = await User.findOne({ email });
+export default class AuthController {
+  static register = async (req, res) => {
+    const { email, name, password } = req.body;
+    const emailExists = await User.findOne({ email });
 
-  if (emailExists) {
-    throw new CustomAPIError("User already exist");
-  }
+    if (emailExists) {
+      throw new CustomAPIError("User already exist");
+    }
 
-  const isFirstAccount = (await User.countDocuments({})) === 0;
+    const isFirstAccount = (await User.countDocuments({})) === 0;
 
-  const role = isFirstAccount ? "admin" : "user";
+    const role = isFirstAccount ? "admin" : "user";
 
-  const user = await User.create({ name, email, password, role });
+    const user = await User.create({ name, email, password, role });
 
-  const tokenUser = createUserToken(user);
+    const tokenUser = createUserToken(user);
 
-  attachCookiesToResponse({ res, user: tokenUser });
+    attachCookiesToResponse({ res, user: tokenUser });
 
-  res.status(StatusCodes.CREATED).json({ user: tokenUser });
-};
+    res.status(StatusCodes.CREATED).json({ user: tokenUser });
+  };
 
-export const login = async (req, res) => {
-  const { email, password } = req.body;
+  static login = async (req, res) => {
+    const { email, password } = req.body;
 
-  if (!email || !password) {
-    throw new BadRequestError("Please provide email and password");
-  }
+    if (!email || !password) {
+      throw new BadRequestError("Please provide email and password");
+    }
 
-  const user = await User.findOne({ email });
-  if (!user) {
-    throw new UnauthenticatedError("Invalid credentials");
-  }
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw new UnauthenticatedError("Invalid credentials");
+    }
 
-  const isPasswordCorrect = await user.comparePassword(password);
-  if (!isPasswordCorrect) {
-    throw new UnauthenticatedError("Invalid credentials");
-  }
+    const isPasswordCorrect = await user.comparePassword(password);
+    if (!isPasswordCorrect) {
+      throw new UnauthenticatedError("Invalid credentials");
+    }
 
-  const tokenUser = createUserToken(user);
-  attachCookiesToResponse({ res, user: tokenUser });
+    const tokenUser = createUserToken(user);
+    attachCookiesToResponse({ res, user: tokenUser });
 
-  res.status(StatusCodes.OK).json({ user: tokenUser });
-};
+    res.status(StatusCodes.OK).json({ user: tokenUser });
+  };
 
-export const logout = async (req, res) => {
-  res.cookie("token", "logout", {
-    httpOnly: true,
-    expires: new Date(Date.now()),
-  });
+  static logout = async (req, res) => {
+    res.cookie("token", "logout", {
+      httpOnly: true,
+      expires: new Date(Date.now()),
+    });
 
-  res.status(StatusCodes.OK).json({ msg: "user logged out!" });
-};
+    res.status(StatusCodes.OK).json({ msg: "user logged out!" });
+  };
+}
